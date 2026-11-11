@@ -1,0 +1,76 @@
+{
+  "protocol": "CascadeAttestationGraph/v1.0",
+  "repository": "dorinalunar/cascade-attestation-graph",
+  "trusted_hosts": [
+    "raw.githubusercontent.com",
+    "security.genlayer.io"
+  ],
+  "scenarios": [
+    {
+      "scenario_id": "selective-cascade-revocation-and-disjoint-settlement",
+      "description": "Verifies two independent attestation branches (Branch A and Branch B), revokes root A1 via a security advisory, confirms A1 turns REVOKED and milestone A2 turns CASCADE_HALTED with frozen escrow, while disjoint milestone B2 settles cleanly.",
+      "initial_deposit_wei": 10000,
+      "vertices": [
+        {
+          "vertex_id": "att-audit-a1",
+          "vertex_kind": 1,
+          "upstream_ids": [],
+          "artifact_uri": "https://raw.githubusercontent.com/dorinalunar/cascade-attestation-graph/main/evidence/audit_a1.txt",
+          "claim_scope": "Zero-knowledge prover circuit v2.1 formal verification",
+          "escrowed_wei": 2000
+        },
+        {
+          "vertex_id": "ms-deploy-a2",
+          "vertex_kind": 2,
+          "upstream_ids": [
+            "att-audit-a1"
+          ],
+          "artifact_uri": "",
+          "claim_scope": "Mainnet prover deployment payout",
+          "escrowed_wei": 3000
+        },
+        {
+          "vertex_id": "att-audit-b1",
+          "vertex_kind": 1,
+          "upstream_ids": [],
+          "artifact_uri": "https://raw.githubusercontent.com/dorinalunar/cascade-attestation-graph/main/evidence/audit_b1.txt",
+          "claim_scope": "Bridge relayer enclave attestation v1.4",
+          "escrowed_wei": 1500
+        },
+        {
+          "vertex_id": "ms-release-b2",
+          "vertex_kind": 2,
+          "upstream_ids": [
+            "att-audit-b1"
+          ],
+          "artifact_uri": "",
+          "claim_scope": "Relayer operator milestone release",
+          "escrowed_wei": 2500
+        }
+      ],
+      "artifacts": {
+        "https://raw.githubusercontent.com/dorinalunar/cascade-attestation-graph/main/evidence/audit_a1.txt": {
+          "body": "Formal Verification Report: Zero-knowledge prover circuit v2.1 passed all soundness constraints with zero critical findings.",
+          "verdict": "CONFIRMED",
+          "excerpt": "passed all soundness constraints with zero critical findings"
+        },
+        "https://raw.githubusercontent.com/dorinalunar/cascade-attestation-graph/main/evidence/audit_b1.txt": {
+          "body": "Enclave Attestation Report: Bridge relayer enclave attestation v1.4 verified against hardware root of trust.",
+          "verdict": "CONFIRMED",
+          "excerpt": "verified against hardware root of trust"
+        },
+        "https://security.genlayer.io/advisories/cve-2026-9901.txt": {
+          "body": "CRITICAL REVOCATION ADVISORY CVE-2026-9901: Zero-knowledge prover circuit v2.1 formal verification is formally revoked due to an under-constrained witness soundness bug.",
+          "verdict": "CONFIRMED",
+          "excerpt": "formally revoked due to an under-constrained witness soundness bug"
+        }
+      },
+      "expected_post_revocation_telemetry": {
+        "vault_unallocated_wei": 1000,
+        "vault_escrowed_wei": 4000,
+        "vault_frozen_wei": 5000,
+        "vault_disbursed_wei": 0
+      }
+    }
+  ]
+}
